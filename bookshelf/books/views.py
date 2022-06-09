@@ -1,12 +1,13 @@
 import csv
 import json
 
+from django.core.exceptions import ValidationError
 from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
-from django.views import generic
-from django.core.exceptions import ValidationError
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
+from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import Author, Book
 
@@ -37,8 +38,9 @@ class BooksListByAuthorView(generic.ListView):
 
     def get_queryset(self):
         author_id = self.kwargs['author_id']
+        author = get_object_or_404(Author, id=author_id)
         return Book.objects\
-            .filter(authors__id=author_id)\
+            .filter(authors=author)\
             .prefetch_related('authors')
 
     def get(self, requets, *args, **kwargs):
